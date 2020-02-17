@@ -230,6 +230,9 @@ open class InlineAutocompleteEditText @JvmOverloads constructor(
     private val isAmazonEchoShowKeyboard: Boolean
         get() = INPUT_METHOD_AMAZON_ECHO_SHOW == getCurrentInputMethod()
 
+    private val isSwiftKeyKeyboard: Boolean
+        get() = INPUT_METHOD_SWIFTKEY == getCurrentInputMethod()
+
     public override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
@@ -544,8 +547,15 @@ open class InlineAutocompleteEditText @JvmOverloads constructor(
                     // On Amazon Echo Show devices, restarting input prevents us from backspacing
                     // the last few characters of autocomplete: #911. However, on non-Echo devices,
                     // not restarting input will cause the keyboard to desync when backspacing: #1489.
-                    if (!isAmazonEchoShowKeyboard) {
+                    // SwiftKey ignores the first character input after restartInput() when editing URL with
+                    // autocomplete suggestion included in URL. See https://github.com/mozilla-mobile/fenix/issues/6290
+                    if (!isAmazonEchoShowKeyboard && !isSwiftKeyKeyboard) {
                         restartInput()
+                    }
+                    //Swiftkey resets the text selection to process it's internal suggestion system,
+                    // this leads to https://github.com/mozilla-mobile/fenix/issues/6290
+                    if (isSwiftKeyKeyboard) {
+                        selectAll()
                     }
                     return false
                 }
@@ -721,6 +731,7 @@ open class InlineAutocompleteEditText @JvmOverloads constructor(
         // ID, they should have similar behavior.
         const val INPUT_METHOD_AMAZON_ECHO_SHOW = "com.amazon.bluestone.keyboard/.DictationIME"
         const val INPUT_METHOD_SONY = "com.sonyericsson.textinput.uxp/.glue.InputMethodServiceGlue"
+        const val INPUT_METHOD_SWIFTKEY = "com.touchtype.swiftkey/com.touchtype.KeyboardService"
 
         /**
          * Get the portion of text that is not marked as autocomplete text.
