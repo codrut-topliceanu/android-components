@@ -187,8 +187,10 @@ sealed class TabListAction : BrowserAction() {
 
     /**
      * Removes both private and normal [TabSessionState]s.
+     * @property recoverable Setting this to false will prevent [UndoMiddleware] from being able to
+     * recover the removed tabs.
      */
-    object RemoveAllTabsAction : TabListAction()
+    data class RemoveAllTabsAction(val recoverable: Boolean = true) : TabListAction()
 
     /**
      * Removes all private [TabSessionState]s.

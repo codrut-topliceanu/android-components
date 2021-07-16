@@ -256,8 +256,12 @@ class TabsUseCases(
     class RemoveAllTabsUseCase internal constructor(
         private val store: BrowserStore
     ) {
-        operator fun invoke() {
-            store.dispatch(TabListAction.RemoveAllTabsAction)
+        /**
+         * Removes all tabs.
+         * @param recoverable set to false to prevent removed tabs from being recoverable by [UndoMiddleware]
+         */
+        operator fun invoke(recoverable: Boolean = true) {
+            store.dispatch(TabListAction.RemoveAllTabsAction(recoverable))
         }
     }
 
